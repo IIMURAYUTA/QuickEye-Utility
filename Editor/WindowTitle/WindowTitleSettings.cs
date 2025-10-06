@@ -56,31 +56,26 @@ public static Settings Instance =>
             style.richText = true;
             EditorGUI.BeginChangeCheck();
 
-            var enable = SettingsGUILayout.SettingsToggle("Enable Custom Window Title", _EnableCustomTitle, searchContext);
-            if (enable != _EnableCustomTitle.value)
-            {
-                _EnableCustomTitle.value = enable;
-                Instance.Save();
-                UpdateWindowTitle();
-            }
-
+            _EnableCustomTitle.value =
+                SettingsGUILayout.SettingsToggle("Enable Custom Window Title", _EnableCustomTitle, searchContext);
             using (new EditorGUI.DisabledScope(!_EnableCustomTitle.value))
             {
-                var format = SettingsGUILayout.SettingsTextField("Window Title Format String", _FormatString, searchContext);
-                if (format != _FormatString.value)
-                {
-                    _FormatString.value = format;
-                    Instance.Save();
-                    UpdateWindowTitle();
-                }
+                _FormatString.value =
+                    SettingsGUILayout.SettingsTextField("Window Title Format String", _FormatString, searchContext);
+                _RepositoryPath.value =
+                    SettingsGUILayout.SettingsTextField(
+                        new GUIContent("Git Repository Path", "Git repository root directory"), _RepositoryPath,
+                        searchContext);
 
-                var repo = SettingsGUILayout.SettingsTextField(
-                    new GUIContent("Git Repository Path", "Git repository root directory"), _RepositoryPath, searchContext);
-                if (repo != _RepositoryPath.value)
+                // 手動更新ボタンのみ追加
+                GUILayout.Space(6);
+                using (new GUILayout.HorizontalScope())
                 {
-                    _RepositoryPath.value = repo;
-                    Instance.Save();
-                    UpdateWindowTitle();
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(new GUIContent("Update Window Title", "Force refresh the main window title"), GUILayout.Width(180)))
+                    {
+                        UpdateWindowTitle();
+                    }
                 }
 
                 var parametersInfoBox = $@"Available title parameters:
@@ -97,22 +92,13 @@ public static Settings Instance =>
 
             if (EditorGUI.EndChangeCheck())
             {
-                // Fallback to ensure persistence; update was already called per-field above
                 Instance.Save();
                 UpdateWindowTitle();
             }
         }
-
-        private static void UpdateWindowTitle()
-        {
-            try
-            {
-                var type = typeof(EditorApplication);
-                var method = type.GetMethod("UpdateMainWindowTitle", BindingFlags.Static | BindingFlags.NonPublic);
-                method?.Invoke(null, null);
-            }
-            catch
-            {
+// ... existing code ...
+}
+#endif
             }
         }
     }
