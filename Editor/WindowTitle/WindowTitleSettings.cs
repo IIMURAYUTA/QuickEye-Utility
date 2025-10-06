@@ -34,6 +34,16 @@ public static Settings Instance =>
         public static string WindowTitle => TitleFormatter.Format(_FormatString.value);
         public static string RepositoryPath => _RepositoryPath.value;
 
+        // Ensure updates on domain load and playmode/scene/platform changes
+        [InitializeOnLoadMethod]
+        private static void Init()
+        {
+            UpdateWindowTitle();
+            EditorApplication.playModeStateChanged += _ => UpdateWindowTitle();
+            EditorSceneManager.activeSceneChangedInEditMode += (_, __) => UpdateWindowTitle();
+            EditorUserBuildSettings.activeBuildTargetChanged += UpdateWindowTitle;
+        }
+
         [UserSettingBlock(" ")]
         private static void OnGUI(string searchContext)
         {
@@ -42,16 +52,33 @@ public static Settings Instance =>
             style.richText = true;
             EditorGUI.BeginChangeCheck();
 
-            _EnableCustomTitle.value =
-                SettingsGUILayout.SettingsToggle("Enable Custom Window Title", _EnableCustomTitle, searchContext);
+            var enable = SettingsGUILayout.SettingsToggle("Enable Custom Window Title", _EnableCustomTitle, searchContext);
+            if (enable != _EnableCustomTitle.value)
+            {
+                _EnableCustomTitle.value = enable;
+                Instance.Save();
+                UpdateWindowTitle();
+            }
+
             using (new EditorGUI.DisabledScope(!_EnableCustomTitle.value))
             {
-                _FormatString.value =
-                    SettingsGUILayout.SettingsTextField("Window Title Format String", _FormatString, searchContext);
-                _RepositoryPath.value =
-                    SettingsGUILayout.SettingsTextField(
-                        new GUIContent("Git Repository Path", "Git repository root directory"), _RepositoryPath,
-                        searchContext);
+                var format = SettingsGUILayout.SettingsTextField("Window Title Format String", _FormatString, searchContext);
+                if (format != _FormatString.value)
+                {
+                    _FormatString.value = format;
+                    Instance.Save();
+                    UpdateWindowTitle();
+                }
+
+                var repo = SettingsGUILayout.SettingsTextField(
+                    new GUIContent("Git Repository Path", "Git repository root directory"), _RepositoryPath, searchContext);
+                if (repo != _RepositoryPath.value)
+                {
+                    _RepositoryPath.value = repo;
+                    Instance.Save();
+                    UpdateWindowTitle();
+                }
+
                 var parametersInfoBox = $@"Available title parameters:
     • <Branch> {_DisabledTextColorTag}{TitleFormatter.Format("<Branch>")}</color>
     • <SceneName> {_DisabledTextColorTag}{TitleFormatter.Format("<SceneName>")}</color>
@@ -66,6 +93,7 @@ public static Settings Instance =>
 
             if (EditorGUI.EndChangeCheck())
             {
+                // Fallback to ensure persistence; update was already called per-field above
                 Instance.Save();
                 UpdateWindowTitle();
             }
@@ -77,7 +105,7 @@ public static Settings Instance =>
             {
                 var type = typeof(EditorApplication);
                 var method = type.GetMethod("UpdateMainWindowTitle", BindingFlags.Static | BindingFlags.NonPublic);
-                method.Invoke(null, null);
+                method?.Invoke(null, null);
             }
             catch
             {
