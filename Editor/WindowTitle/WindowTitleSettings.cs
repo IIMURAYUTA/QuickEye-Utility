@@ -11,7 +11,11 @@ namespace QuickEye.Utility.Editor.WindowTitle
         private static Settings _instance;
 
 public static Settings Instance =>
-    _instance ?? (_instance = new Settings(new[] { new PackageSettingsRepository("com.quickeye.utility", "com.quickeye.utility") }));
+    _instance ?? (_instance = new Settings(new[] {
+// Add UserSettingsRepository so SettingsGUILayout can write/read without warnings
+        new UserSettingsRepository(),
+ new PackageSettingsRepository("com.quickeye.utility", "com.quickeye.utility") 
+}));
 
 
         private static readonly string _DisabledTextColorTag =
