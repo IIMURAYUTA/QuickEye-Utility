@@ -11,7 +11,11 @@ namespace QuickEye.Utility.Editor.WindowTitle
         private static Settings _instance;
 
         public static Settings Instance =>
-            _instance ?? (_instance = new Settings(new[] { new UserSettingsRepository() }));
+    _instance ?? (_instance = new Settings(new ISettingsRepository[]
+    {
+        //new UserSettingsRepository(),
+        new PackageSettingsRepository()
+    }));
 
         private static readonly string _DisabledTextColorTag =
             $"<color=#{ColorUtility.ToHtmlStringRGB(EditorColorPalette.Current.DefaultText)}{128:X2}>";
