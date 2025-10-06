@@ -18,16 +18,16 @@ namespace QuickEye.Utility.Editor.WindowTitle
 
         [UserSetting]
         private static readonly UserSetting<bool> _EnableCustomTitle =
-            new UserSetting<bool>(Instance, "qe.window-title.enable", false, SettingsScope.User);
+            new UserSetting<bool>(Instance, "qe.window-title.enable", false, SettingsScope.Project);
 
         [UserSetting]
         private static readonly UserSetting<string> _FormatString =
             new UserSetting<string>(Instance, "qe.window-title.format-string", "<RepoDirName> | <Branch>",
-                SettingsScope.User);
+                SettingsScope.Project);
 
         [UserSetting]
         private static readonly UserSetting<string> _RepositoryPath =
-            new UserSetting<string>(Instance, "qe.window-title.repo-path", "./", SettingsScope.User);
+            new UserSetting<string>(Instance, "qe.window-title.repo-path", "./", SettingsScope.Project);
 
         public static bool EnableCustomTitle => _EnableCustomTitle.value;
         public static string WindowTitle => TitleFormatter.Format(_FormatString.value);
