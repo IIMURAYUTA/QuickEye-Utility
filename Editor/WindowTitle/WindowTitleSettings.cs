@@ -48,7 +48,7 @@ public static Settings Instance =>
             EditorUserBuildSettings.activeBuildTargetChanged += UpdateWindowTitle;
         }
 
-        [UserSettingBlock(" ")]
+ [UserSettingBlock(" ")]
         private static void OnGUI(string searchContext)
         {
             var style = new GUIStyle(EditorStyles.helpBox);
@@ -96,9 +96,17 @@ public static Settings Instance =>
                 UpdateWindowTitle();
             }
         }
-// ... existing code ...
-}
-#endif
+
+        private static void UpdateWindowTitle()
+        {
+            try
+            {
+                var type = typeof(EditorApplication);
+                var method = type.GetMethod("UpdateMainWindowTitle", BindingFlags.Static | BindingFlags.NonPublic);
+                method?.Invoke(null, null);
+            }
+            catch
+            {
             }
         }
     }
