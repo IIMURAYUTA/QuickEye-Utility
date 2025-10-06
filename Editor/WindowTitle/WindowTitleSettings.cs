@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.SettingsManagement;
 using UnityEngine;
+using UnityEditor.SceneManagement; // Add this import
 
 namespace QuickEye.Utility.Editor.WindowTitle
 {
